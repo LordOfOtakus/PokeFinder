@@ -71,12 +71,9 @@ static u16 getItem(BWRNG &rng, Lead lead, const PersonalInfo *info)
 
 WildGenerator5::WildGenerator5(u32 initialAdvances, u32 maxAdvances, u32 delay, Method method, Lead lead, u8 luckyPower,
                                const EncounterArea5 &area, const Profile5 &profile, const WildStateFilter &filter) :
-    WildGenerator(initialAdvances, maxAdvances, delay, method, lead, area, profile, filter), luckyPower(luckyPower)
+    WildGenerator(initialAdvances, maxAdvances, delay, method, lead, area, profile, filter),
+    luckyPower((profile.getVersion() & Game::BW) != Game::None ? 0 : luckyPower)
 {
-    if ((profile.getVersion() & Game::BW) != Game::None)
-    {
-        luckyPower = 0;
-    }
 }
 
 std::vector<WildState5> WildGenerator5::generate(u64 seed, u32 initialAdvances, u32 maxAdvances) const
@@ -114,7 +111,7 @@ std::vector<WildState5> WildGenerator5::generate(u64 seed, const std::vector<std
 
     bool bw = (profile.getVersion() & Game::BW) != Game::None;
     bool id = (profile.getTID() & 1) ^ (profile.getSID() & 1);
-    std::vector<u8> modifiedSlots = area.getSlots(lead);
+    auto modifiedSlots = area.getSlots(lead);
 
     u8 shinyRolls = 1;
     if ((profile.getVersion() & Game::BW2) != Game::None)
@@ -182,7 +179,7 @@ std::vector<WildState5> WildGenerator5::generate(u64 seed, const std::vector<std
         u8 encounterSlot;
         if (magnetStatic && !modifiedSlots.empty())
         {
-            encounterSlot = modifiedSlots[go.nextUInt(modifiedSlots.size())];
+            encounterSlot = modifiedSlots[go.nextUInt()];
         }
         else
         {

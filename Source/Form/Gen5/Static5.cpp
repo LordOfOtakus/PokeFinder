@@ -72,6 +72,9 @@ Static5::Static5(QWidget *parent) : QWidget(parent), ui(new Ui::Static5)
                                        { toInt(Lead::CuteCharmM), toInt(Lead::CuteCharmF) });
     ui->comboMenuSearcherLead->addMenu(tr("Synchronize"), Translator::getNatures());
 
+    ui->comboBoxGeneratorLuckyPower->setup({ 0, 3, 3 });
+    ui->comboBoxSearcherLuckyPower->setup({ 0, 3, 3 });
+
     connect(ui->comboBoxProfiles, &QComboBox::currentIndexChanged, this, &Static5::profileIndexChanged);
     connect(ui->pushButtonGenerate, &QPushButton::clicked, this, &Static5::generate);
     connect(ui->pushButtonSearch, &QPushButton::clicked, this, &Static5::search);
@@ -159,12 +162,14 @@ void Static5::generate()
     u32 maxAdvances = ui->textBoxGeneratorMaxAdvances->getUInt();
     u32 delay = ui->textBoxGeneratorDelay->getUInt();
     auto lead = ui->comboMenuGeneratorLead->getEnum<Lead>();
+    u8 luckyPower = 0;
 
-    const StaticTemplate *staticTemplate
+    const StaticTemplate5 *staticTemplate
         = Encounters5::getStaticEncounter(ui->comboBoxGeneratorCategory->currentIndex(), ui->comboBoxGeneratorPokemon->getCurrentInt());
 
     auto filter = ui->filterGenerator->getFilter<StateFilter>();
-    StaticGenerator5 generator(initialAdvances, maxAdvances, delay, Method::None, lead, *staticTemplate, *currentProfile, filter);
+    StaticGenerator5 generator(initialAdvances, maxAdvances, delay, Method::None, lead, luckyPower, *staticTemplate, *currentProfile,
+                               filter);
 
     auto states = generator.generate(seed, ivAdvances, 0);
     generatorModel->addItems(states);
@@ -175,7 +180,7 @@ void Static5::generatorCategoryIndexChanged(int index)
     if (index >= 0)
     {
         int size;
-        const StaticTemplate *templates = Encounters5::getStaticEncounters(index, &size);
+        const StaticTemplate5 *templates = Encounters5::getStaticEncounters(index, &size);
 
         ui->comboBoxGeneratorPokemon->clear();
         for (int i = 0; i < size; i++)
@@ -194,7 +199,7 @@ void Static5::generatorPokemonIndexChanged(int index)
 {
     if (index >= 0)
     {
-        const StaticTemplate *staticTemplate
+        const StaticTemplate5 *staticTemplate
             = Encounters5::getStaticEncounter(ui->comboBoxGeneratorCategory->currentIndex(), ui->comboBoxGeneratorPokemon->getCurrentInt());
         ui->spinBoxGeneratorLevel->setValue(staticTemplate->getLevel());
         ui->comboBoxGeneratorShiny->setCurrentIndex(ui->comboBoxGeneratorShiny->findData(toInt(staticTemplate->getShiny())));
@@ -249,12 +254,14 @@ void Static5::search()
     u32 initialAdvances = ui->textBoxSearcherInitialAdvances->getUInt();
     u32 maxAdvances = ui->textBoxSearcherMaxAdvances->getUInt();
     auto lead = ui->comboMenuSearcherLead->getEnum<Lead>();
+    u8 luckyPower = 0;
 
-    const StaticTemplate *staticTemplate
+    const StaticTemplate5 *staticTemplate
         = Encounters5::getStaticEncounter(ui->comboBoxSearcherCategory->currentIndex(), ui->comboBoxSearcherPokemon->getCurrentInt());
 
     auto filter = ui->filterSearcher->getFilter<StateFilter>();
-    StaticGenerator5 generator(initialAdvances, maxAdvances, 0, Method::Method5, lead, *staticTemplate, *currentProfile, filter);
+    StaticGenerator5 generator(initialAdvances, maxAdvances, 0, Method::Method5, lead, luckyPower, *staticTemplate, *currentProfile,
+                               filter);
 
     IVSearcher5<StaticGenerator5, State5> *searcher;
     if (fastSearchEnabled())
@@ -303,7 +310,7 @@ void Static5::searcherCategoryIndexChanged(int index)
     if (index >= 0)
     {
         int size;
-        const StaticTemplate *templates = Encounters5::getStaticEncounters(index, &size);
+        const StaticTemplate5 *templates = Encounters5::getStaticEncounters(index, &size);
 
         ui->comboBoxSearcherPokemon->clear();
         for (int i = 0; i < size; i++)
@@ -336,7 +343,7 @@ void Static5::searcherPokemonIndexChanged(int index)
 {
     if (index >= 0)
     {
-        const StaticTemplate *staticTemplate
+        const StaticTemplate5 *staticTemplate
             = Encounters5::getStaticEncounter(ui->comboBoxSearcherCategory->currentIndex(), ui->comboBoxSearcherPokemon->getCurrentInt());
         ui->spinBoxSearcherLevel->setValue(staticTemplate->getLevel());
         ui->comboBoxSearcherShiny->setCurrentIndex(ui->comboBoxSearcherShiny->findData(toInt(staticTemplate->getShiny())));
